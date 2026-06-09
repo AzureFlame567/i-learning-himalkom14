@@ -43,7 +43,7 @@ export default function MateriPage() {
 
     setProfile(prof)
     setNim(mhs?.NIM || '')
-    setLp(lpd)
+    setLp(lpd as LP | null)
     setNode(nd)
     setAllNodes(allNd || [])
     setMateriList(mat || [])
