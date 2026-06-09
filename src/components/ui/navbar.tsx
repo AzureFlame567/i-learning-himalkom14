@@ -7,6 +7,7 @@ import { useState, useRef, useEffect } from 'react'
 interface NavbarProps {
   username?: string
   nim?: string
+  role?: string
 }
 
 export default function Navbar({ username = '', nim = '' }: NavbarProps) {
