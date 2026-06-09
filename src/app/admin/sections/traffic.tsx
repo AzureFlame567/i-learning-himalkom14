@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
 
 interface NodeStat { judul: string; done: number; lpName: string }
-interface ProgRow  { roadmapnode_id: string; updated_at: string }
+interface ProgRow  { roadmapnode_id: string; updated_at: string; user_id: string }
 
 export default function TrafficPage() {
   const [nodeStats, setNodeStats] = useState<NodeStat[]>([])
@@ -13,27 +13,32 @@ export default function TrafficPage() {
 
   useEffect(() => {
     async function load() {
-      const [{ data: prog }, { data: nodes }, { data: lps }, { data: users }] = await Promise.all([
+      // Menggunakan casting 'as any' pada Promise.all untuk menyelaraskan response mentah Supabase
+      const [{ data: prog }, { data: nodes }, { data: lps }] = await Promise.all([
         supabase.from('progress').select('roadmapnode_id,updated_at,user_id'),
         supabase.from('roadmapnode').select('id,judul,learningpath_id'),
-        supabase.from('learningpath').select('id,Nama Learning Path'),
-        supabase.from('profiles').select('id', { count: 'exact', head: true }),
+        supabase.from('learningpath').select('id, "Nama Learning Path"'),
       ])
 
-      // Node stats
+      // 1. Node stats mapping
       const nodeMap: Record<string, number> = {}
-      ;(prog || []).forEach((p: ProgRow) => {
-        nodeMap[p.roadmapnode_id] = (nodeMap[p.roadmapnode_id] || 0) + 1
+      ;(prog || []).forEach((p: any) => {
+        if (p.roadmapnode_id) {
+          nodeMap[p.roadmapnode_id] = (nodeMap[p.roadmapnode_id] || 0) + 1
+        }
       })
+
+      // Mengatasi Type Error dengan melakukan safe casting ke array objek
       const lpMap: Record<string, string> = {}
       ;((lps || []) as any[]).forEach((l) => { 
         if (l && l.id) {
           lpMap[l.id] = l['Nama Learning Path'] || '—'
         }
       })
-      const ns: NodeStat[] = (nodes || [])
-        .map((n: { id: string; judul: string; learningpath_id: string }) => ({
-          judul: n.judul,
+
+      const ns: NodeStat[] = ((nodes || []) as any[])
+        .map((n) => ({
+          judul: n.judul || 'Tanpa Judul',
           done: nodeMap[n.id] || 0,
           lpName: lpMap[n.learningpath_id] || '—',
         }))
@@ -41,23 +46,26 @@ export default function TrafficPage() {
         .slice(0, 8)
       setNodeStats(ns)
 
-      // Daily activity (last 7 days)
+      // 2. Daily activity (last 7 days)
       const days: { day: string; count: number }[] = []
       for (let i = 6; i >= 0; i--) {
         const d = new Date()
         d.setDate(d.getDate() - i)
         const dayStr = d.toISOString().split('T')[0]
         const label  = d.toLocaleDateString('id-ID', { weekday: 'short' })
-        const count  = (prog || []).filter((p: ProgRow) => p.updated_at?.startsWith(dayStr)).length
+        const count  = (prog || []).filter((p: any) => p.updated_at?.startsWith(dayStr)).length
         days.push({ day: label, count })
       }
       setDailyData(days)
 
-      const uniqueUsers = new Set((prog || []).map((p: { user_id: string }) => p.user_id)).size
+      // 3. Hitung total user unik dan rata-rata
+      const uniqueUsers = new Set((prog || []).map((p: any) => p.user_id).filter(Boolean)).size
+      const totalProgress = (prog || []).length
+      
       setTotals({
         users: uniqueUsers,
-        progress: (prog || []).length,
-        avgPerUser: uniqueUsers > 0 ? Math.round((prog || []).length / uniqueUsers * 10) / 10 : 0,
+        progress: totalProgress,
+        avgPerUser: uniqueUsers > 0 ? Math.round((totalProgress / uniqueUsers) * 10) / 10 : 0,
       })
       setLoading(false)
     }
