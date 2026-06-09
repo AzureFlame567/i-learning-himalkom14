@@ -42,6 +42,7 @@ export default function Navbar({ username = '', nim = '' }: NavbarProps) {
     <nav style={{
       position: 'sticky', top: 0, zIndex: 100,
       height: 56, display: 'flex', alignItems: 'center',
+      justifyContent: 'space-between', // Menjaga Logo di kiri dan Avatar di kanan tetap rapi
       padding: '0 28px', gap: 8,
       background: 'rgba(8,12,22,.85)',
       backdropFilter: 'blur(18px)',
@@ -59,8 +60,14 @@ export default function Navbar({ username = '', nim = '' }: NavbarProps) {
         </span>
       </Link>
 
-      {/* Nav links */}
-      <div style={{ display: 'flex', gap: 2, flex: 1 }}>
+      {/* Nav links - SEKARANG SUDAH DI TENGAH */}
+      <div style={{ 
+        display: 'flex', 
+        gap: 2, 
+        position: 'absolute', 
+        left: '50%', 
+        transform: 'translateX(-50%)' 
+      }}>
         {links.map(l => {
           const active = path.startsWith(l.href)
           return (
