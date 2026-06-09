@@ -26,7 +26,11 @@ export default function TrafficPage() {
         nodeMap[p.roadmapnode_id] = (nodeMap[p.roadmapnode_id] || 0) + 1
       })
       const lpMap: Record<string, string> = {}
-      ;(lps || []).forEach((l: { id: string; 'Nama Learning Path': string }) => { lpMap[l.id] = l['Nama Learning Path'] })
+      ;((lps || []) as any[]).forEach((l) => { 
+        if (l && l.id) {
+          lpMap[l.id] = l['Nama Learning Path'] || '—'
+        }
+      })
       const ns: NodeStat[] = (nodes || [])
         .map((n: { id: string; judul: string; learningpath_id: string }) => ({
           judul: n.judul,
