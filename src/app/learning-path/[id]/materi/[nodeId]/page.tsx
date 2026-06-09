@@ -157,29 +157,7 @@ export default function MateriPage() {
             </div>
           ))}
 
-          {/* Other nodes nav */}
-          {allNodes.length > 1 && (
-            <div style={{ marginTop: 24, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
-              <div style={{ padding: '0 18px 8px', fontSize: 11, color: 'var(--muted)', letterSpacing: '0.5px' }}>
-                MODUL LAINNYA
-              </div>
-              {allNodes.filter(n => n.id !== nodeId).map(n => (
-                <div
-                  key={n.id}
-                  onClick={() => router.push(`/learning-path/${id}/materi/${n.id}`)}
-                  style={{
-                    padding: '8px 18px', fontSize: 12, cursor: 'pointer',
-                    color: 'var(--muted)', transition: 'color .15s',
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.color = 'var(--cyan)'}
-                  onMouseLeave={e => e.currentTarget.style.color = 'var(--muted)'}
-                >
-                  Modul {n.urutan} — {n.judul}
-                </div>
-              ))}
-            </div>
-          )}
-        </aside>
+
 
         {/* Content area */}
         <main style={{ flex: 1, overflowY: 'auto', padding: '32px 40px' }}>
